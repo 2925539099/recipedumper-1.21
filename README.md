@@ -147,7 +147,7 @@ python tools/verify_dump.py run/export/dump_recipes_armor_addon.json
 | **原版** | https://github.com/friendlyhj/RecipeDumper |
 | **原版作者** | youyihj（2021） |
 | **原版范围** | Minecraft 1.16 ~ 1.20.6，已停更 |
-| **本移植** | Minecraft 1.21.1 / NeoForge，由 2925539099 完成 |
+| **本移植** | Minecraft 1.21.1 / NeoForge，由 2925539099提出， DeepSeek 完成 |
 
 **导出的 JSON 格式、槽位编号规则、类型命名全部沿用原版设计**——这是刻意的，
 因为 MC百科那边的解析器是按原版的输出写的，格式一动就得两边同时改。
