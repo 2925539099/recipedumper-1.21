@@ -1,0 +1,65 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.143'
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+    archivesName = 'RecipeDumper'
+}
+
+// 仓库镜像 + Mojang 下载重写代理（与 armor-addon-neoforge 共用同一份脚本）
+apply from: 'gradle/mojang-mirror.gradle'
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
+    withSourcesJar()
+}
+
+// 源码包只用于在 IDE 里阅读源码，绝不能被当成模组：
+// 里面的 neoforge.mods.toml 没经过 processResources 展开，${version} 会让游戏
+// 进入 broken mod state。所以剔除它，并单独放一个目录避免误拖进 mods/。
+tasks.named('sourcesJar', Jar) {
+    exclude 'META-INF/neoforge.mods.toml'
+    destinationDirectory.set(layout.buildDirectory.dir('libs/sources'))
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 21
+}
+
+neoForge {
+    version = project.neo_version
+
+    // AT 文件放在默认位置（src/main/resources/META-INF/accesstransformer.cfg），
+    // 不需要额外配置；打开校验能让写错的目标立刻报错而不是静默失效。
+    validateAccessTransformers = true
+
+    runs {
+        client {
+            client()
+        }
+        server {
+            server()
+            programArgument '--nogui'
+        }
+    }
+
+    mods {
+        "recipedumper" {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+processResources {
+    filteringCharset = 'UTF-8'
+    inputs.property 'version', project.version
+
+    filesMatching('META-INF/neoforge.mods.toml') {
+        expand version: project.version
+    }
+}

@@ -1,0 +1,13 @@
+pluginManagement {
+    repositories {
+        // NeoForge 官方仓库在部分网络环境下不可达，改用 ForgeCDN 镜像。
+        maven {
+            name = 'NeoForgedCDN'
+            url = 'https://neoforged.forgecdn.net/releases/'
+        }
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+rootProject.name = 'recipedumper-neoforge'

@@ -1,0 +1,183 @@
+/*
+ * 盔甲附加（NeoForge 版）—— 下载源镜像支持
+ *
+ * 本机网络环境下，Mojang 官方下载源（piston-meta / piston-data /
+ * libraries.minecraft.net）与 NeoForge 官方仓库（maven.neoforged.net）
+ * 均不可达。本脚本做两件事：
+ *
+ * 1. 把 ModDevGradle 硬编码的三个仓库换成可达的镜像：
+ *      Mojang Minecraft Libraries -> BMCLAPI maven
+ *      Mojang Meta                -> ForgeCDN mojang-meta
+ *      NeoForged Releases         -> ForgeCDN releases
+ *
+ * 2. 启动一个本地 HTTP 重写代理，作为 NeoForm Runtime（NFRT）的 Minecraft
+ *    版本清单来源。NFRT 会从版本清单与版本 JSON 里直接读取 client / server
+ *    jar 的下载地址，这些地址写在 JSON 内容里、无法用属性替换，因此代理会把
+ *    JSON 里所有 Mojang 域名改写到本机，再转发到 BMCLAPI。
+ *
+ * 若你的网络可以直连 Mojang 与 maven.neoforged.net，删掉 build.gradle 里的
+ * apply from 一行即可还原为官方源。
+ */
+
+import com.sun.net.httpserver.HttpServer
+
+import java.net.InetSocketAddress
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
+import java.nio.charset.StandardCharsets
+import java.time.Duration
+import java.util.concurrent.Executors
+
+def bmclapiBase = (project.findProperty('bmclapi_base') ?: 'https://bmclapi2.bangbang93.com').toString().replaceAll('/+$', '')
+def neoForgedMirror = (project.findProperty('neoforged_mirror') ?: 'https://neoforged.forgecdn.net').toString().replaceAll('/+$', '')
+
+// ---------------------------------------------------------------------------
+// 1. 替换被墙的 Maven 仓库
+// ---------------------------------------------------------------------------
+def repoOverrides = [
+        'Mojang Minecraft Libraries': "${bmclapiBase}/maven/",
+        'Mojang Meta'               : "${neoForgedMirror}/mojang-meta/",
+        'NeoForged Releases'        : "${neoForgedMirror}/releases/",
+]
+
+repositories.configureEach { repo ->
+    def replacement = repoOverrides.get(repo.name)
+    if (replacement != null && repo instanceof MavenArtifactRepository) {
+        if (repo.url.toString() != replacement) {
+            repo.setUrl(replacement)
+            logger.lifecycle("[armor-addon] 仓库镜像 ${repo.name} -> ${replacement}")
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// 2. 本地重写代理
+// ---------------------------------------------------------------------------
+final String upstreamBase = bmclapiBase
+final HttpClient httpClient = HttpClient.newBuilder()
+        .connectTimeout(Duration.ofSeconds(30))
+        .followRedirects(HttpClient.Redirect.NORMAL)
+        .executor(Executors.newFixedThreadPool(8))
+        .build()
+
+def server = null
+// 使用固定端口：NFRT 会把「URL 已被改写成 http://127.0.0.1:<port>/...」的版本 JSON
+// 缓存起来，端口每次都变会让缓存里的地址失效、下载直接失败。
+int preferredPort = Integer.parseInt((project.findProperty('mirror_port') ?: '47821').toString())
+for (int port = preferredPort; port < preferredPort + 50 && server == null; port++) {
+    try {
+        server = HttpServer.create(new InetSocketAddress('127.0.0.1', port), 0)
+    } catch (IOException ignored) {
+        // 端口被占用，继续试探下一个
+    }
+}
+if (server == null) {
+    throw new GradleException("在 ${preferredPort} 附近找不到可用端口，可用 -Pmirror_port=<端口> 指定")
+}
+server.setExecutor(Executors.newFixedThreadPool(16))
+
+final String localBase = "http://127.0.0.1:${server.address.port}"
+
+// JSON 内容里需要被改写的 Mojang 地址 -> 本机路径
+final Map<String, String> jsonRewrites = [
+        'https://piston-meta.mojang.com/'          : "${localBase}/",
+        'https://piston-data.mojang.com/'          : "${localBase}/",
+        'https://launchermeta.mojang.com/'         : "${localBase}/",
+        'https://launcher.mojang.com/'             : "${localBase}/",
+        'https://libraries.minecraft.net/'         : "${localBase}/maven/",
+        'https://resources.download.minecraft.net/': "${localBase}/assets/",
+]
+
+server.createContext('/', { exchange ->
+    def os = null
+    try {
+        def rawPath = exchange.requestURI.getRawPath() ?: '/'
+        def rawQuery = exchange.requestURI.getRawQuery()
+        def target = URI.create(upstreamBase + rawPath + (rawQuery ? '?' + rawQuery : ''))
+
+        def requestBuilder = HttpRequest.newBuilder(target)
+                .timeout(Duration.ofMinutes(10))
+                .header('User-Agent', 'Mozilla/5.0')
+
+        def isJson = rawPath.endsWith('.json')
+
+        if (isJson) {
+            def response = httpClient.send(
+                    requestBuilder.GET().build(),
+                    HttpResponse.BodyHandlers.ofByteArray())
+
+            byte[] body = response.body()
+            if (response.statusCode() == 200) {
+                String text = new String(body, StandardCharsets.UTF_8)
+                jsonRewrites.each { from, to -> text = text.replace(from, to) }
+                body = text.getBytes(StandardCharsets.UTF_8)
+            }
+
+            def contentType = response.headers().firstValue('content-type').orElse('application/json')
+            exchange.responseHeaders.add('Content-Type', contentType)
+            if (exchange.requestMethod.equalsIgnoreCase('HEAD')) {
+                exchange.sendResponseHeaders(response.statusCode(), -1)
+            } else {
+                exchange.sendResponseHeaders(response.statusCode(), body.length)
+                os = exchange.responseBody
+                os.write(body)
+            }
+        } else {
+            // 非 JSON（jar / 资源文件等）：原样流式转发。
+            // 注意：不要把上游的 Content-Length 手工塞进响应头，否则会与
+            // HttpServer 的分块编码冲突，导致大文件被截断、校验和不匹配。
+            def response = httpClient.send(
+                    requestBuilder.method(exchange.requestMethod,
+                            HttpRequest.BodyPublishers.noBody()).build(),
+                    HttpResponse.BodyHandlers.ofInputStream())
+
+            def code = response.statusCode()
+            def contentType = response.headers().firstValue('content-type').orElse('application/octet-stream')
+            exchange.responseHeaders.add('Content-Type', contentType)
+
+            if (exchange.requestMethod.equalsIgnoreCase('HEAD') || code != 200) {
+                exchange.sendResponseHeaders(code, -1)
+            } else {
+                long length = response.headers().firstValueAsLong('content-length').orElse(-1L)
+                // 已知长度则原样声明，未知长度交给 HttpServer 分块编码
+                exchange.sendResponseHeaders(code, length >= 0 ? length : 0)
+                os = exchange.responseBody
+                response.body().withStream { input ->
+                    byte[] buffer = new byte[65536]
+                    int read
+                    while ((read = input.read(buffer)) != -1) {
+                        os.write(buffer, 0, read)
+                    }
+                }
+            }
+        }
+    } catch (Throwable t) {
+        logger.warn("[armor-addon] 代理请求失败 ${exchange.requestURI}: ${t}")
+        try {
+            exchange.sendResponseHeaders(502, -1)
+        } catch (Throwable ignored) {
+            // 响应已开始写出，忽略
+        }
+    } finally {
+        try {
+            os?.close()
+        } catch (Throwable ignored) {
+        }
+        exchange.close()
+    }
+})
+
+server.start()
+final String manifestUrl = "${localBase}/mc/game/version_manifest_v2.json"
+logger.lifecycle("[armor-addon] Mojang 重写代理已启动: ${localBase}")
+
+gradle.buildFinished { server.stop(0) }
+
+// ---------------------------------------------------------------------------
+// 3. 让 NFRT 从本地代理读取 Minecraft 版本清单
+// ---------------------------------------------------------------------------
+neoFormRuntime {
+    launcherManifestUrl.set(manifestUrl)
+}

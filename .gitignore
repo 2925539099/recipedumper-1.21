@@ -1,0 +1,24 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.eclipse/
+bin/
+run/
+
+# ModMind 工具元数据（本机开发用，不进版本控制）
+.modmind/
+modmind.project.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python 编译缓存
+__pycache__/
+*.py[cod]
