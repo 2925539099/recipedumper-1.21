@@ -1,12 +1,7 @@
 MIT License
 
-Copyright (c) 2021 youyihj — 原版 RecipeDumper
-Copyright (c) 2026 2925539099 — Minecraft 1.21.1 / NeoForge 移植
-
-本作品是 RecipeDumper 的移植版本。导出的 JSON 格式、槽位编号规则与
-类型命名都沿用原版设计，这样 MC百科那边的解析器不需要改动。
-    原版仓库: https://github.com/friendlyhj/RecipeDumper
-    原版作者: youyihj
+Copyright (c) 2021 youyihj
+Copyright (c) 2026 2925539099
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

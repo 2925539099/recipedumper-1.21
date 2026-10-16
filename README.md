@@ -155,5 +155,8 @@ python tools/verify_dump.py run/export/dump_recipes_armor_addon.json
 代码本身按 1.21 的配方 API 重写，没有直接复用原版代码；移植过程中参考了原版源码
 以确认格式细节。
 
-许可为 **MIT**，与原版一致。`LICENSE` 里**保留了原作者的版权声明**，
-并注明了移植部分。
+许可为 **MIT**，与原版一致。`LICENSE` 里**保留了原作者的版权声明**。
+
+本移植沿用了原版的哪些设计、又自己改动了什么，写在 [`NOTICE`](NOTICE) 里。
+（那些说明刻意没写进 `LICENSE` —— 许可证正文里插东西会让 GitHub 的
+licensee 识别失败，把整份文件判成 "Other"。）

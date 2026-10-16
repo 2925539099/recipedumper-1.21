@@ -1,0 +1,48 @@
+合成表导出 (RecipeDumper) 1.21.1
+================================
+
+本作品是 RecipeDumper 的移植版本。
+
+    原版名称: RecipeDumper
+    原版作者: youyihj
+    原版仓库: https://github.com/friendlyhj/RecipeDumper
+    原版范围: Minecraft 1.16 ~ 1.20.6
+    MC百科页: https://www.mcmod.cn/class/4341.html
+
+    本移植:   Minecraft 1.21.1 / NeoForge
+    移植作者: 2925539099
+
+
+版权
+----
+
+    Copyright (c) 2021 youyihj              —— 原版 RecipeDumper
+    Copyright (c) 2026 2925539099           —— 1.21.1 / NeoForge 移植
+
+许可为 MIT，完整条款见同目录下的 LICENSE 文件。
+
+
+本移植沿用了原版的哪些设计
+--------------------------
+
+为了让 MC百科那边的解析器不必改动，以下内容**刻意与原版保持一致**：
+
+  * 输出文件路径   export/dump_recipes_<modid>.json
+  * 顶层 JSON 结构 { "recipes": [...], "error": [...] }
+  * 每条配方的字段 type / name / input / output
+  * 输入输出的槽位编号规则
+  * type 的命名（有序 / 无序用无命名空间短名，其余用 RecipeType 注册名）
+  * 烧炼的额外字段 experience / cookTime
+
+
+本移植自己改动了什么
+--------------------
+
+  * 用 Minecraft 1.21 的配方 API 重写，没有直接复用原版代码
+    （原版基于 IRecipe / getRegistryName / NBT，这些在 1.21 都已移除）
+  * 锻造多了一个模板槽位：原版是 base=1、addition=2，
+    本移植保持这两个不变、把 1.21 新增的模板放到 3，这样旧解析器读 1/2 仍然正确
+  * 去掉了原版基于注解扫描 + 反射的 dumper 注册机制，改为直接按类型分派
+  * 新增环境变量 RECIPEDUMPER_AUTO，支持无人值守时自动导出
+
+移植过程中参考了原版源码以确认格式细节。
