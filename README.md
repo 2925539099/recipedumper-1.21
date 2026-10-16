@@ -2,8 +2,12 @@
 
 为 [MC百科](https://www.mcmod.cn) 导出模组配方的工具。
 
-原版 [RecipeDumper](https://www.mcmod.cn/class/4341.html) 由 **youyihj** 制作，只做到 1.20.6 就停更了。
-这是用 **1.21.1 的配方 API 重写**的版本，**导出的 JSON 格式与原版保持一致**，这样百科那边不用改解析器。
+原版 [RecipeDumper](https://github.com/friendlyhj/RecipeDumper) 由 **youyihj** 制作
+（[MC百科页面](https://www.mcmod.cn/class/4341.html)），只做到 1.20.6 就停更了。
+这是 Minecraft **1.21.1 / NeoForge** 的移植版本，**导出的 JSON 格式与原版保持一致**，
+这样百科那边不用改解析器。
+
+原版 > 本移植的对应关系、以及许可说明，见文末的[来源与许可](#来源与许可)。
 
 ---
 
@@ -134,6 +138,22 @@ python tools/verify_dump.py run/export/dump_recipes_armor_addon.json
 
 ---
 
-## 许可
+## 来源与许可
 
-MIT。原版 RecipeDumper 的作者是 youyihj，本重写版沿用同一许可。
+这是 [youyihj](https://github.com/friendlyhj) 的 **RecipeDumper** 的移植版本。
+
+| | |
+| --- | --- |
+| **原版** | https://github.com/friendlyhj/RecipeDumper |
+| **原版作者** | youyihj（2021） |
+| **原版范围** | Minecraft 1.16 ~ 1.20.6，已停更 |
+| **本移植** | Minecraft 1.21.1 / NeoForge，由 2925539099 完成 |
+
+**导出的 JSON 格式、槽位编号规则、类型命名全部沿用原版设计**——这是刻意的，
+因为 MC百科那边的解析器是按原版的输出写的，格式一动就得两边同时改。
+
+代码本身按 1.21 的配方 API 重写，没有直接复用原版代码；移植过程中参考了原版源码
+以确认格式细节。
+
+许可为 **MIT**，与原版一致。`LICENSE` 里**保留了原作者的版权声明**，
+并注明了移植部分。
