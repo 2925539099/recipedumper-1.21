@@ -106,16 +106,16 @@ def expected_from_source(path: Path) -> dict:
             inputs[str(i + 1)] = normalize_ingredient(ing)
         out_type = "crafting_shapeless"
     elif rtype == "smithing_transform":
-        # 导出侧：base=1、addition=2、template=3
-        if "base" in data:
-            inputs["1"] = normalize_ingredient(data["base"])
-        if "addition" in data:
-            inputs["2"] = normalize_ingredient(data["addition"])
+        # 导出侧（1.21 顺序）：模板=1、基底=2、添加物=3
         if "template" in data:
-            inputs["3"] = normalize_ingredient(data["template"])
+            inputs["1"] = normalize_ingredient(data["template"])
+        if "base" in data:
+            inputs["2"] = normalize_ingredient(data["base"])
+        if "addition" in data:
+            inputs["3"] = normalize_ingredient(data["addition"])
         out_type = "smithing"  # 游戏里 RecipeType.SMITHING 就叫这个
     elif rtype == "smithing":
-        # 1.20 之前的旧式锻造（没有模板）
+        # 1.20 之前的旧式锻造（没有模板）：基底 1、添加物 2
         if "base" in data:
             inputs["1"] = normalize_ingredient(data["base"])
         if "addition" in data:

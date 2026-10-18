@@ -36,8 +36,9 @@ import net.minecraft.world.item.crafting.SmithingTransformRecipe;
  *   <li><strong>有序合成</strong>：按 3×3 网格铺开，左上角是 1、右下角是 9，
  *       即 {@code y * 3 + x + 1}。这一步和原版一致，百科那边靠它还原摆放形状。</li>
  *   <li><strong>无序合成</strong>：从 1 开始顺次编号。</li>
- *   <li><strong>锻造</strong>：基底 = 1、添加物 = 2，与原版相同；
- *       1.21 新增的模板放在 <strong>3</strong>，这样旧解析器读 1/2 仍然正确。</li>
+ *   <li><strong>锻造</strong>：按 1.21 的顺序 —— <strong>模板 = 1、基底 = 2、添加物 = 3</strong>，
+ *       与 MC百科「锻造台（1.20+）」界面上从左上到右下的摆放一致；
+ *       1.16 时代的旧格式是基底 1、添加物 2、没有模板，这里不再迁就。</li>
  *   <li><strong>烧炼 / 切石</strong>：输入 1、输出 1。</li>
  * </ul>
  *
@@ -100,10 +101,13 @@ public final class RecipeJson {
 				addIngredient(json, i + 1, ingredients.get(i));
 			}
 		} else if (recipe instanceof SmithingTransformRecipe smithing) {
-			// 这三个字段是包级私有，靠 accesstransformer.cfg 打开
-			addIngredient(json, 1, smithing.base);
-			addIngredient(json, 2, smithing.addition);
-			addIngredient(json, 3, smithing.template);
+			// 按 1.21 的顺序排：锻造模板 1、基底 2、添加物 3。
+			// 这与 MC百科「锻造台（1.20+）」界面上从左上到右下的摆放一致，
+			// 也是 1.20 之后配方 JSON 里 template / base / addition 的顺序。
+			// 这三个字段是包级私有，靠 accesstransformer.cfg 打开。
+			addIngredient(json, 1, smithing.template);
+			addIngredient(json, 2, smithing.base);
+			addIngredient(json, 3, smithing.addition);
 		} else {
 			// 烧炼、切石，以及以后可能加的其他单输入配方
 			NonNullList<Ingredient> ingredients = recipe.getIngredients();

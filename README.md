@@ -70,14 +70,18 @@ RECIPEDUMPER_AUTO=armor_addon ./gradlew runServer
 | --- | --- | --- |
 | **有序合成** | `crafting_shaped` | 按 3×3 网格：左上角 1、右下角 9，即 `y * 3 + x + 1` |
 | **无序合成** | `crafting_shapeless` | 从 1 顺次编号 |
-| **锻造** | `minecraft:smithing_transform` | **基底 = 1、添加物 = 2、模板 = 3** |
+| **锻造** | `smithing` | **模板 = 1、基底 = 2、添加物 = 3** |
 | **烧炼** | `minecraft:smelting` 等 | 1，另带 `experience` / `cookTime` |
 | **切石** | `minecraft:stonecutting` | 1 |
 
 输出一律用槽位 1。
 
-> **关于锻造的模板槽位**：1.16 的锻造只有基底和添加物，原版把基底放 1、添加物放 2。
-> 1.21 多了模板，这里**沿用原版的 1/2 不动，把模板放到 3** —— 这样旧的解析器读 1/2 仍然正确。
+> **关于锻造的槽位顺序**：按 **1.21 的顺序**排，也就是 MC百科「锻造台（1.20+）」
+> 界面上从左上到右下依次是 **模板 → 基底 → 添加物**，对应槽位 **1 / 2 / 3**。
+>
+> 1.16 时代的旧格式是「基底 1、添加物 2、没有模板」。这里**不再迁就那个顺序**，
+> 因为 1.20 之后配方本身的字段顺序就是 `template` / `base` / `addition`，
+> 而且百科更新后的锻造台模板是按新顺序画的。
 
 > **关于 `type` 的命名空间**：有序 / 无序合成用原版写死的无命名空间名字
 > （`crafting_shaped` / `crafting_shapeless`），其余用 `RecipeType` 的注册名（带命名空间）。
@@ -91,7 +95,7 @@ RECIPEDUMPER_AUTO=armor_addon ./gradlew runServer
 | --- | --- | --- |
 | 导出框架 | 注解扫描 + 反射注册各类型的 dumper | 直接在代码里按类型分派 |
 | 配方 API | `IRecipe` / `getRegistryName` / NBT | `Recipe` / `ResourceLocation` / 数据组件 |
-| 锻造 | base=1、addition=2 | base=1、addition=2、**template=3** |
+| 锻造 | base=1、addition=2 | **template=1、base=2、addition=3**（1.21 顺序） |
 | 烧炼 | `getCookTime()` | `getCookingTime()` |
 | 自动导出 | 无 | 支持 `RECIPEDUMPER_AUTO` 环境变量 |
 
