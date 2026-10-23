@@ -481,30 +481,6 @@
       }
     },
     {
-      "type": "smithing",
-      "name": "armor_addon:alloy_ultra_heavy_leggings_smithing",
-      "input": {
-        "1": {
-          "item": "armor_addon:armor_upgrade_template",
-          "count": 1
-        },
-        "2": {
-          "item": "armor_addon:diamond_ultra_heavy_leggings",
-          "count": 1
-        },
-        "3": {
-          "item": "minecraft:netherite_block",
-          "count": 1
-        }
-      },
-      "output": {
-        "1": {
-          "item": "armor_addon:alloy_ultra_heavy_leggings",
-          "count": 1
-        }
-      }
-    },
-    {
       "type": "crafting_shaped",
       "name": "armor_addon:wool_helmet",
       "input": {
@@ -1081,30 +1057,6 @@
       }
     },
     {
-      "type": "smithing",
-      "name": "armor_addon:alloy_ultra_heavy_helmet_smithing",
-      "input": {
-        "1": {
-          "item": "armor_addon:armor_upgrade_template",
-          "count": 1
-        },
-        "2": {
-          "item": "armor_addon:diamond_ultra_heavy_helmet",
-          "count": 1
-        },
-        "3": {
-          "item": "minecraft:netherite_block",
-          "count": 1
-        }
-      },
-      "output": {
-        "1": {
-          "item": "armor_addon:alloy_ultra_heavy_helmet",
-          "count": 1
-        }
-      }
-    },
-    {
       "type": "crafting_shapeless",
       "name": "armor_addon:alloy_lining_boots",
       "input": {
@@ -1374,30 +1326,6 @@
     },
     {
       "type": "smithing",
-      "name": "armor_addon:alloy_ultra_heavy_chestplate_smithing",
-      "input": {
-        "1": {
-          "item": "armor_addon:armor_upgrade_template",
-          "count": 1
-        },
-        "2": {
-          "item": "armor_addon:diamond_ultra_heavy_chestplate",
-          "count": 1
-        },
-        "3": {
-          "item": "minecraft:netherite_block",
-          "count": 1
-        }
-      },
-      "output": {
-        "1": {
-          "item": "armor_addon:alloy_ultra_heavy_chestplate",
-          "count": 1
-        }
-      }
-    },
-    {
-      "type": "smithing",
       "name": "armor_addon:diamond_heavy_boots_smithing",
       "input": {
         "1": {
@@ -1608,30 +1536,6 @@
       "output": {
         "1": {
           "item": "armor_addon:gold_lining_chestplate",
-          "count": 1
-        }
-      }
-    },
-    {
-      "type": "smithing",
-      "name": "armor_addon:alloy_ultra_heavy_boots_smithing",
-      "input": {
-        "1": {
-          "item": "armor_addon:armor_upgrade_template",
-          "count": 1
-        },
-        "2": {
-          "item": "armor_addon:diamond_ultra_heavy_boots",
-          "count": 1
-        },
-        "3": {
-          "item": "minecraft:netherite_block",
-          "count": 1
-        }
-      },
-      "output": {
-        "1": {
-          "item": "armor_addon:alloy_ultra_heavy_boots",
           "count": 1
         }
       }
