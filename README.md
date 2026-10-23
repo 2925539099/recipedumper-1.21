@@ -138,7 +138,7 @@ NeoForge 走 ForgeCDN 镜像、Mojang 资源走 BMCLAPI，适配国内网络。
 python tools/verify_dump.py run/export/dump_recipes_armor_addon.json
 ```
 
-用它跑「盔甲附加」1.3.3 的 69 条配方，结果是 **69 条全部一致，0 不符 / 0 缺失 / 0 多余**。
+用它跑「盔甲附加」1.3.4 的 65 条配方，结果是 **65 条全部一致，0 不符 / 0 缺失 / 0 多余**。
 
 ---
 
